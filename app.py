@@ -22,7 +22,7 @@ def home():
     return render_template("index.html",short_url=short_url)
 
 @app.route("/<code>")
-def rediect_url(code):
+def redirect_url(code):
     original_url = url_db.get(code)
     if original_url:
         return redirect(original_url)
