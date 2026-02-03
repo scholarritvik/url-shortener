@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>URL Stats</title>
+</head>
+<body>
+    <h1>URL Statistics</h1>
+
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>Short URL</th>
+            <th>Original URL</th>
+            <th>Clicks</th>
+        </tr>
+
+        {% for code, original_url, clicks in data %}
+        <tr>
+            <td>
+                <a href="{{ url_for('redirect_url', code=code, _external=True) }}">
+                    {{ code }}
+                </a>
+            </td>
+            <td>{{ original_url }}</td>
+            <td>{{ clicks }}</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <br>
+    <a href="/">Back</a>
+</body>
+</html>

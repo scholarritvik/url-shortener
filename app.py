@@ -68,6 +68,18 @@ def redirect_url(code):
     conn.close()
     return "URL not found!"
 
+@app.route("/stats")
+def stats():
+    conn = sqlite3.connect("urls.db")
+    c = conn.cursor()
+
+    c.execute("SELECT code, original_url, clicks FROM urls")
+    data = c.fetchall()
+
+    conn.close()
+
+    return render_template("stats.html",data=data)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
