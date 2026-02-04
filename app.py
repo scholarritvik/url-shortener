@@ -1,43 +1,22 @@
-from flask import Flask, render_template, request, redirect, url_for
-import random
-import string
-import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, abort
+from services import create_short_url, resolve_short_code
+from database import init_db
 
 app = Flask(__name__)
 
-url_db = {}  # temporary storage
-
-def init_db():
-    conn = sqlite3.connect("urls.db")
-    c = conn.cursor()
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS urls (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            code TEXT UNIQUE,
-            original_url TEXT,
-            clicks INTEGER DEFAULT 0
-        )
-    """)
-    conn.commit()
-    conn.close()
-
+# Initialize DB once at startup
 init_db()
-
-def generate(length=6):
-    return "".join(random.choices(string.ascii_letters + string.digits, k=length))
 
 
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
-        original_url = request.form["url"]
-        code = generate()
+        original_url = request.form.get("url")
 
-        conn = sqlite3.connect("urls.db")
-        c = conn.cursor()
-        c.execute("INSERT INTO urls (code, original_url) VALUES (?, ?)", (code, original_url))
-        conn.commit()
-        conn.close()
+        try:
+            code = create_short_url(original_url)
+        except ValueError:
+            return render_template("index.html", error="Invalid URL")
 
         return redirect(url_for("result", code=code))
 
@@ -52,33 +31,20 @@ def result(code):
 
 @app.route("/<code>")
 def redirect_url(code):
-    conn = sqlite3.connect("urls.db")
-    c = conn.cursor()
+    original_url = resolve_short_code(code)
 
-    c.execute("SELECT original_url, clicks FROM urls WHERE code=?", (code,))
-    row = c.fetchone()
+    if not original_url:
+        abort(404)
 
-    if row:
-        original_url, clicks = row
-        c.execute("UPDATE urls SET clicks=? WHERE code=?", (clicks+1, code))
-        conn.commit()
-        conn.close()
-        return redirect(original_url)
+    return redirect(original_url)
 
-    conn.close()
-    return "URL not found!"
 
 @app.route("/stats")
 def stats():
-    conn = sqlite3.connect("urls.db")
-    c = conn.cursor()
-
-    c.execute("SELECT code, original_url, clicks FROM urls")
-    data = c.fetchall()
-
-    conn.close()
-
-    return render_template("stats.html",data=data)
+    # optional: move this to database.py later
+    from database import get_all_urls
+    data = get_all_urls()
+    return render_template("stats.html", data=data)
 
 
 if __name__ == "__main__":
