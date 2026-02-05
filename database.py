@@ -91,7 +91,7 @@ def get_all_urls():
     c = conn.cursor()
 
     c.execute("""
-        SELECT short_code, original_url, clicks, created_at
+        SELECT short_code, original_url, clicks, created_at, expires_at
         FROM urls
         ORDER BY created_at DESC
     """)

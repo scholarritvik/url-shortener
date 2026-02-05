@@ -16,12 +16,13 @@
                     <tr>
                         <th>Short URL</th>
                         <th>Original URL</th>
-                        <th>Clicks</th>
-                        <th>Created</th>
+                        <th>No.of Clicks</th>
+                        <th>Created on</th>
+                        <th>Expires on</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for code, original_url, clicks, created_at in data %}
+                    {% for code, original_url, clicks, created_at,expires_at in data %}
                     <tr>
                         <td>
                             <a href="{{ url_for('redirect_url', code=code, _external=True) }}" target="_blank">
@@ -35,6 +36,7 @@
                             <span class="badge bg-primary">{{ clicks }}</span>
                         </td>
                         <td>{{ created_at }}</td>
+                        <td>{{ expires_at }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
