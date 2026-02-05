@@ -19,7 +19,7 @@ def init_db():
             short_code TEXT UNIQUE,
             clicks INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            expires_at TIMESTAMP
+            expires_at TIMESTAMP NOT NULL
         )
     """)
 
@@ -28,19 +28,18 @@ def init_db():
 
 
 # ---------- INSERT ----------
-def insert_url_and_get_id(original_url: str) -> int:
+def insert_url_and_get_id(original_url, expires_at):
     conn = get_connection()
     c = conn.cursor()
 
     c.execute(
-        "INSERT INTO urls (original_url) VALUES (?)",
-        (original_url,)
+        "INSERT INTO urls (original_url, expires_at) VALUES (?, ?)",
+        (original_url, expires_at)
     )
     conn.commit()
 
     url_id = c.lastrowid
     conn.close()
-
     return url_id
 
 
@@ -61,13 +60,14 @@ def get_url_by_code(code: str):
     conn = get_connection()
     c = conn.cursor()
 
-    c.execute(
-        "SELECT original_url, clicks FROM urls WHERE short_code=?",
-        (code,)
-    )
+    c.execute("""
+        SELECT original_url, clicks, expires_at
+        FROM urls
+        WHERE short_code = ?
+    """, (code,))
+
     row = c.fetchone()
     conn.close()
-
     return row
 
 
@@ -91,7 +91,7 @@ def get_all_urls():
     c = conn.cursor()
 
     c.execute("""
-        SELECT short_code, original_url, clicks, created_at
+        SELECT short_code, original_url, clicks, created_at, expires_at
         FROM urls
         ORDER BY created_at DESC
     """)
