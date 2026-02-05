@@ -15,10 +15,14 @@ def home():
 
         try:
             code = create_short_url(original_url)
-        except ValueError:
-            return render_template("index.html", error="Invalid URL")
+            return redirect(url_for("result", code=code))
 
-        return redirect(url_for("result", code=code))
+        except ValueError as e:
+            return render_template(
+                "index.html",
+                error=str(e),
+                input_url=original_url
+            )
 
     return render_template("index.html")
 

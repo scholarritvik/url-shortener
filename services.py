@@ -50,7 +50,7 @@ def create_short_url(original_url: str) -> str:
     Returns short_code for a valid URL.
     """
     if not is_valid_url(original_url):
-        raise ValueError("Invalid URL")
+        raise ValueError("Invalid URL, please enter proper URL")
 
     # Step 1: Insert URL, get ID
     url_id = insert_url_and_get_id(original_url)

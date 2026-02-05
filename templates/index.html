@@ -9,24 +9,38 @@
     <div class="container mt-5">
         <div class="card shadow p-4">
             <h1 class="text-center mb-4">URL Shortener</h1>
-    
+
+            <!-- Error message -->
+            {% if error %}
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+            {% endif %}
+
             <form method="POST" action="/" class="d-flex gap-2">
-                <input type="text" name="url" class="form-control" placeholder="Enter long URL" required>
+                <input
+                    type="text"
+                    name="url"
+                    class="form-control"
+                    placeholder="Enter long URL"
+                    value="{{ input_url or '' }}"
+                    required
+                >
                 <button type="submit" class="btn btn-primary">Shorten</button>
             </form>
-    
+
             {% if short_url %}
                 <div class="alert alert-success mt-4">
                     Short URL:
                     <a href="{{ short_url }}" target="_blank">{{ short_url }}</a>
                 </div>
             {% endif %}
-    
+
             <div class="text-center mt-3">
                 <a href="/stats" class="btn btn-outline-secondary btn-sm">View Stats</a>
             </div>
         </div>
     </div>
-    
-</body>    
+
+</body>
 </html>
