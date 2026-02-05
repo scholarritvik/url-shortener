@@ -12,16 +12,19 @@ init_db()
 def home():
     if request.method == "POST":
         original_url = request.form.get("url")
+        expiry = request.form.get("expiry")
 
         try:
-            code = create_short_url(original_url)
-            return redirect(url_for("result", code=code))
+            code = create_short_url(original_url, expiry)
+            short_url = url_for("redirect_url", code=code, _external=True)
+            return render_template("index.html", short_url=short_url)
 
         except ValueError as e:
             return render_template(
                 "index.html",
                 error=str(e),
-                input_url=original_url
+                input_url=original_url,
+                input_expiry=expiry
             )
 
     return render_template("index.html")
@@ -35,12 +38,15 @@ def result(code):
 
 @app.route("/<code>")
 def redirect_url(code):
-    original_url = resolve_short_code(code)
+    url, status = resolve_short_code(code)
 
-    if not original_url:
+    if status == "not_found":
         abort(404)
 
-    return redirect(original_url)
+    if status == "expired":
+        abort(410)
+
+    return redirect(url)
 
 
 @app.route("/stats")
